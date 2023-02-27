@@ -1,0 +1,8 @@
+1. The File is a Component, Text and Sound represent Leaf and the Folder is a composite. 
+Everything in Unix systems is a file, and folders are unique files that house other files.
+
+2. Drawable is a Component, Rectangle and Ellipse are Leaf and Group is Composite.
+All rectangles and ellipses are drawable and we can also draw them in groups hence groups are made of rectangles and ellipses. 
+
+3. We can have a car as a component, we can have an engine that is made up from other electrical and mechanical components as composite and 
+these electrical and mechanical components as leafs. 
