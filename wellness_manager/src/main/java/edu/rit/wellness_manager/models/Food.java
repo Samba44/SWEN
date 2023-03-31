@@ -1,11 +1,14 @@
 package edu.rit.wellness_manager.models;
 
+import java.util.List;
+
 public class Food implements Edible {
     private String name;
     private double calories;
     private double fat;
     private double carb;
     private double protein;
+    private double quantity;
 
     //constructor
     public Food(String name, double calories, double fat, double carb, double protein) {
@@ -14,6 +17,7 @@ public class Food implements Edible {
         this.fat = fat;
         this.carb = carb;
         this.protein = protein;
+        quantity = 1;
     }
     //getters
     public String getName() {
@@ -33,7 +37,7 @@ public class Food implements Edible {
     }
 
     public double getQuantity() {
-        return 0;
+        return quantity;
     }
 
     public double getProtein() {
@@ -61,8 +65,41 @@ public class Food implements Edible {
         this.protein = protein;
     }
 
+    public void setQuantity(double quantity) {
+        this.quantity = quantity;
+    }
+
+    //because of composable interface this can be unimplemented
+    public Edible getEdible(int i) {
+        return null;
+    }
+
+    public void addEdible(Edible child, double quantity) {
+
+    }
+
+    public void removeEdible(Edible child) {
+
+    }
+
+    public List<Edible> getEdibles() {
+        return null;
+    }
+
     @Override
     public String toString() {
         return "b," + name + "," + calories + "," + fat + "," + carb + "," + protein;
+    }
+
+    @Override
+    public Edible clone() throws CloneNotSupportedException {
+        Food clone = (Food) super.clone();
+        clone.setName(this.name);
+        clone.setCalories(this.calories);
+        clone.setQuantity(this.quantity);
+        clone.setCarb(this.carb);
+        clone.setFat(this.fat);
+        clone.setProtein(this.protein);
+        return clone;
     }
 }

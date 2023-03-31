@@ -12,10 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SaveController {
+public class SaveController implements FileController{
 
-    private final String foodFileName ="foods.csv";
-    private final String logFileName ="log.csv";
 
     public void saveEdible(List<Edible>ediblesToSave){
         try {
