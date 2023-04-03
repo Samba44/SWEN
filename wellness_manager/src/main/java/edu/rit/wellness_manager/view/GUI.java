@@ -1,3 +1,5 @@
+package edu.rit.wellness_manager.view;
+
 import javafx.application.*;
 import javafx.event.*;
 import javafx.scene.*;
