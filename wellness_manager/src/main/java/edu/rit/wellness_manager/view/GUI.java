@@ -1,5 +1,8 @@
 package edu.rit.wellness_manager.view;
 
+import edu.rit.wellness_manager.controllers.MainController;
+import edu.rit.wellness_manager.controllers.SaveController;
+import edu.rit.wellness_manager.models.Food;
 import javafx.application.*;
 import javafx.event.*;
 import javafx.scene.*;
@@ -57,7 +60,12 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
    
    // Date Picker
    private DatePicker datePicker = new DatePicker();
-   
+
+   //text inputs
+   TextInputDialog tidNewFood = new TextInputDialog("Enter new food.");
+   TextInputDialog tidNewCalLimit = new TextInputDialog("Enter calorie limit.");
+   TextInputDialog tidNewWeightLimit = new TextInputDialog("Enter weight limit.");
+
    // Main
    public static void main(String[] args) {
       launch(args);
@@ -66,12 +74,19 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
    // Event Listener
    public void handle(ActionEvent ae) {
       String selection = ((MenuItem)ae.getSource()).getText();
+      MainController mainController = MainController.getInstance();
       switch(selection) {
          case "Save":
-            // Method
+            SaveController saveController = new SaveController();
+            saveController.saveEdible(mainController.getAllEdibles());
+            //TODO dailyLog
             break;
          case "New Food":
-            // Method
+            tidNewFood.showAndWait();
+            String foodString = tidNewFood.getEditor().getText();
+            String[] split = foodString.split(",");
+            Food food = new Food(split[0],Double.parseDouble(split[1]),Double.parseDouble(split[2]),Double.parseDouble(split[3]),Double.parseDouble(split[4]));
+            mainController.addEdible(food);
             break;
          case "New Recipe":
             // Method
@@ -80,10 +95,18 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
             // Method
             break;
          case "Set Calorie Limit":
-            // Method
+            LocalDate date = datePicker.getValue();
+            tidNewCalLimit.showAndWait();
+            String newCalLimit = tidNewCalLimit.getEditor().getText();
+            mainController.setCalLimit(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),Double.parseDouble(newCalLimit));
+            tfCalorieLimit.setText(newCalLimit);
             break;
           case "Set Weight Limit":
-            // Method
+             LocalDate date2 = datePicker.getValue();
+             tidNewWeightLimit.showAndWait();
+             String newWeightLimit = tidNewWeightLimit.getEditor().getText();
+             mainController.setWeightLimit(Date.from(date2.atStartOfDay(ZoneId.systemDefault()).toInstant()),Double.parseDouble(newWeightLimit));
+             tfWeightLimit.setText(newWeightLimit);
             break;
           case "Exit":
             System.exit(0);
@@ -124,7 +147,8 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       gpList.setHgap(5);
       gpList.setVgap(5);
       gpList.setAlignment(Pos.CENTER);
-      
+
+      datePicker.setValue(LocalDate.now());
       gpList.add(datePicker, 0, 0);
       gpList.add(taList, 0, 1);
       
@@ -163,10 +187,17 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       GridPane gpMain = new GridPane();
       gpMain.add(gpList, 0, 0);
       gpMain.add(gpInfo, 1, 0);
-      
+
+      tidNewFood.setHeaderText("Enter new food in format:\n name,calories,fat,carb,protein");
+      tidNewFood.setContentText("New food: ");
+
+      tidNewCalLimit.setContentText("New Calorie Limit: ");
+
+      tidNewWeightLimit.setContentText("New Weight Limit: ");
+
       root.getChildren().addAll(menuBar, gpMain);
       
-      scene = new Scene(root, 500, 600);
+      scene = new Scene(root, 700, 600);
       stage.setScene(scene);
       stage.setResizable(false);
       stage.show();  

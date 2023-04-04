@@ -1,5 +1,6 @@
 package edu.rit.wellness_manager.controllers;
 
+import edu.rit.wellness_manager.models.DailyLog;
 import edu.rit.wellness_manager.models.Edible;
 import edu.rit.wellness_manager.models.Log;
 
@@ -32,10 +33,21 @@ public class MainController {
         dailyLogs.put(date,log);
     }
     public void setCalLimit(Date date, double calLimit){
-        dailyLogs.get(date).setCalLimit(calLimit);
+        if (dailyLogs.containsKey(date)){
+            dailyLogs.get(date).setCalLimit(calLimit);
+        }else{
+            DailyLog dailyLog = new DailyLog(date,calLimit,Log.DEFAULT_WEIGHT);
+            dailyLogs.put(date,dailyLog);
+        }
     }
     public void setWeightLimit(Date date, double weightLimit){
-        dailyLogs.get(date).setWeightLimit(weightLimit);
+        if (dailyLogs.containsKey(date)){
+            dailyLogs.get(date).setWeightLimit(weightLimit);
+        }else{
+            DailyLog dailyLog = new DailyLog(date,Log.DEFAULT_CALORIES,weightLimit);
+            dailyLogs.put(date,dailyLog);
+        }
+
     }
     public double getCalLimit(Date date){
         return dailyLogs.get(date).getCalLimit();
