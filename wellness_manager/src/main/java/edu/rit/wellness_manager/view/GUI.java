@@ -2,20 +2,22 @@ package edu.rit.wellness_manager.view;
 
 import edu.rit.wellness_manager.controllers.MainController;
 import edu.rit.wellness_manager.controllers.SaveController;
+import edu.rit.wellness_manager.models.Exercise;
 import edu.rit.wellness_manager.models.Food;
-import javafx.application.*;
-import javafx.event.*;
-import javafx.scene.*;
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.*;
-import javafx.scene.text.*;
-import javafx.scene.layout.*;
-import javafx.stage.*;
-import javafx.geometry.*;
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import java.time.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 public class GUI extends Application implements EventHandler<ActionEvent> {
    // Window
@@ -30,6 +32,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
    private MenuItem mi2 = new MenuItem("New Food");
    private MenuItem mi3 = new MenuItem("New Recipe");
    private MenuItem mi4 = new MenuItem("New Log");
+   private MenuItem mi8 = new MenuItem("New Exercise");
    private MenuItem mi5 = new MenuItem("Set Calorie Limit");
    private MenuItem mi6 = new MenuItem("Set Weight Limit");
    private MenuItem mi7 = new MenuItem("Exit");
@@ -63,6 +66,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
 
    //text inputs
    TextInputDialog tidNewFood = new TextInputDialog("Enter new food.");
+   TextInputDialog tidNewExercise = new TextInputDialog("Enter new exercise.");
    TextInputDialog tidNewCalLimit = new TextInputDialog("Enter calorie limit.");
    TextInputDialog tidNewWeightLimit = new TextInputDialog("Enter weight limit.");
 
@@ -79,34 +83,51 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
          case "Save":
             SaveController saveController = new SaveController();
             saveController.saveEdible(mainController.getAllEdibles());
+            saveController.saveExercise(mainController.getAllExercises());
+            saveController.saveLog(mainController.getAllLogs());
             //TODO dailyLog
             break;
          case "New Food":
-            tidNewFood.showAndWait();
-            String foodString = tidNewFood.getEditor().getText();
-            String[] split = foodString.split(",");
-            Food food = new Food(split[0],Double.parseDouble(split[1]),Double.parseDouble(split[2]),Double.parseDouble(split[3]),Double.parseDouble(split[4]));
-            mainController.addEdible(food);
+            Optional<String> s2 = tidNewFood.showAndWait();
+            if(s2.isPresent()) {
+               String foodString = tidNewFood.getEditor().getText();
+               String[] split = foodString.split(",");
+               Food food = new Food(split[0], Double.parseDouble(split[1]), Double.parseDouble(split[2]), Double.parseDouble(split[3]), Double.parseDouble(split[4]));
+               mainController.addEdible(food);
+            }
             break;
          case "New Recipe":
             // Method
+            break;
+         case "New Exercise":
+            Optional<String> s3 = tidNewExercise.showAndWait();
+            if(s3.isPresent()) {
+               String exerciseString = tidNewExercise.getEditor().getText();
+               String[] split2 = exerciseString.split(",");
+               Exercise exercise = new Exercise(split2[0], Double.parseDouble(split2[1]));
+               mainController.addExercise(exercise);
+            }
             break;
          case "New Log":
             // Method
             break;
          case "Set Calorie Limit":
             LocalDate date = datePicker.getValue();
-            tidNewCalLimit.showAndWait();
-            String newCalLimit = tidNewCalLimit.getEditor().getText();
-            mainController.setCalLimit(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),Double.parseDouble(newCalLimit));
-            tfCalorieLimit.setText(newCalLimit);
+            Optional<String> s = tidNewCalLimit.showAndWait();
+            if (s.isPresent()){
+               String newCalLimit = tidNewCalLimit.getEditor().getText();
+               mainController.setCalLimit(date,Double.parseDouble(newCalLimit));
+               tfCalorieLimit.setText(newCalLimit);
+            }
             break;
           case "Set Weight Limit":
              LocalDate date2 = datePicker.getValue();
-             tidNewWeightLimit.showAndWait();
-             String newWeightLimit = tidNewWeightLimit.getEditor().getText();
-             mainController.setWeightLimit(Date.from(date2.atStartOfDay(ZoneId.systemDefault()).toInstant()),Double.parseDouble(newWeightLimit));
-             tfWeightLimit.setText(newWeightLimit);
+             Optional<String> s1 = tidNewWeightLimit.showAndWait();
+             if(s1.isPresent()) {
+                String newWeightLimit = tidNewWeightLimit.getEditor().getText();
+                mainController.setWeightLimit(date2, Double.parseDouble(newWeightLimit));
+                tfWeightLimit.setText(newWeightLimit);
+             }
             break;
           case "Exit":
             System.exit(0);
@@ -125,7 +146,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       root = new VBox();
       
       // Set up Menu
-      menu.getItems().addAll(mi1, mi2, mi3, mi4, mi5, mi6, mi7);
+      menu.getItems().addAll(mi1, mi2, mi3, mi4, mi8, mi5, mi6, mi7);
       menuBar.getMenus().add(menu);
       
       mi1.setOnAction(this);
@@ -135,6 +156,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       mi5.setOnAction(this);
       mi6.setOnAction(this);
       mi7.setOnAction(this);
+      mi8.setOnAction(this);
       
       // Set up List and Date Picker
       taList.setWrapText(true);
@@ -190,6 +212,9 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
 
       tidNewFood.setHeaderText("Enter new food in format:\n name,calories,fat,carb,protein");
       tidNewFood.setContentText("New food: ");
+
+      tidNewExercise.setHeaderText("Enter new exercise in format:\n name,calories");
+      tidNewExercise.setContentText("New exercise: ");
 
       tidNewCalLimit.setContentText("New Calorie Limit: ");
 

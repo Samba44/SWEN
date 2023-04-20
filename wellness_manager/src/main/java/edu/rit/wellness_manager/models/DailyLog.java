@@ -1,22 +1,25 @@
 package edu.rit.wellness_manager.models;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class DailyLog implements Log{
 
-    private final Date date;
+    private final LocalDate date;
     private double calLimit;
     private double weightLimit;
     private List<Edible>edibles;
+    private List<Exercise>exercises;
 
     //constructor
-    public DailyLog(Date date, double calLimit, double weightLimit) {
+    public DailyLog(LocalDate date, double calLimit, double weightLimit) {
         this.date = date;
         this.calLimit = calLimit;
         this.weightLimit = weightLimit;
         this.edibles = new ArrayList<>();
+        this.exercises = new ArrayList<>();
     }
 
     public void addEdible(Edible entry) {
@@ -25,6 +28,14 @@ public class DailyLog implements Log{
 
     public void removeEdible(Edible entry) {
         edibles.remove(entry);
+    }
+
+    public void addExercise(Exercise entry) {
+        exercises.add(entry);
+    }
+
+    public void removeExercise(Exercise entry) {
+        exercises.remove(entry);
     }
 
     public void setCalLimit(double limit) {
@@ -48,16 +59,19 @@ public class DailyLog implements Log{
         for (Edible e : edibles){
             totalCalories += e.getCalories();
         }
+        for (Exercise e : exercises){
+            totalCalories -= e.getCalories();
+        }
         return totalCalories;
     }
 
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%d,%d,%d,w,%.2f\n", date.getYear(), date.getMonth(), date.getDay(), weightLimit));
-        sb.append(String.format("%d,%d,%d,c,%.2f\n", date.getYear(), date.getMonth(), date.getDay(), calLimit));
+        sb.append(String.format("%d,%d,%d,w,%.2f\n", date.getYear(), date.getMonthValue(), date.getDayOfMonth(), weightLimit));
+        sb.append(String.format("%d,%d,%d,c,%.2f\n", date.getYear(), date.getMonthValue(), date.getDayOfMonth(), calLimit));
         for (Edible var : edibles) {
-            sb.append(String.format("%d,%d,%d,f,%s,%.2f\n", date.getYear(), date.getMonth(), date.getDay(), var.getName(), var.getQuantity()));
+            sb.append(String.format("%d,%d,%d,f,%s,%.2f\n", date.getYear(), date.getMonthValue(), date.getDayOfMonth(), var.getName(), var.getQuantity()));
         }
         return sb.toString();
     }

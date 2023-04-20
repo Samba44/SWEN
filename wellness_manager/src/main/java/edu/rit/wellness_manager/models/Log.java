@@ -5,6 +5,8 @@ public interface Log {
     double DEFAULT_CALORIES = 2000.0;
     void addEdible(Edible entry);
     void removeEdible(Edible entry);
+    void addExercise(Exercise entry);
+    void removeExercise(Exercise entry);
     void setCalLimit(double limit);
     void setWeightLimit(double limit);
     double getCalLimit();

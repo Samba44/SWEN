@@ -1,6 +1,7 @@
 package edu.rit.wellness_manager.controllers;
 
 import edu.rit.wellness_manager.models.Edible;
+import edu.rit.wellness_manager.models.Exercise;
 import edu.rit.wellness_manager.models.Food;
 import edu.rit.wellness_manager.models.Recipe;
 
@@ -43,5 +44,16 @@ public class LoadController implements FileController{
 
     public void loadLog(){
         Scanner scan = new Scanner(logFileName);
+    }
+
+    //loadExercise
+    public void loadExercise(List<Exercise>exercises){
+        Scanner scan = new Scanner(exerciseFileName);
+        while(scan.hasNextLine()) {
+            String s = scan.nextLine();
+            String[] split = s.split(",");
+            Exercise exercise = new Exercise(split[1],Double.parseDouble(split[2]));
+            exercises.add(exercise);
+        }
     }
 }

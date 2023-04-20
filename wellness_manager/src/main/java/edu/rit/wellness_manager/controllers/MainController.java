@@ -2,8 +2,10 @@ package edu.rit.wellness_manager.controllers;
 
 import edu.rit.wellness_manager.models.DailyLog;
 import edu.rit.wellness_manager.models.Edible;
+import edu.rit.wellness_manager.models.Exercise;
 import edu.rit.wellness_manager.models.Log;
 
+import java.time.LocalDate;
 import java.util.*;
 
 public class MainController {
@@ -16,23 +18,35 @@ public class MainController {
     }
     private List<Edible> edibles;
 
-    private Map<Date, Log> dailyLogs;
+    private Map<LocalDate, Log> dailyLogs;
+
+    private List<Exercise> exercises;
 
     //constructor
     private MainController(){
         edibles = new ArrayList<>();
         dailyLogs = new TreeMap<>();
+        exercises = new ArrayList<>();
     }
+
     public void addEdible(Edible edible){
         edibles.add(edible);
     }
     public void removeEdible(Edible edible){
         edibles.remove(edible);
     }
-    public void addLog(Log log,Date date){
+
+    public void addExercise(Exercise exercise){
+        exercises.add(exercise);
+    }
+    public void removeExercise(Exercise exercise){
+        exercises.remove(exercise);
+    }
+
+    public void addLog(Log log,LocalDate date){
         dailyLogs.put(date,log);
     }
-    public void setCalLimit(Date date, double calLimit){
+    public void setCalLimit(LocalDate date, double calLimit){
         if (dailyLogs.containsKey(date)){
             dailyLogs.get(date).setCalLimit(calLimit);
         }else{
@@ -40,7 +54,7 @@ public class MainController {
             dailyLogs.put(date,dailyLog);
         }
     }
-    public void setWeightLimit(Date date, double weightLimit){
+    public void setWeightLimit(LocalDate date, double weightLimit){
         if (dailyLogs.containsKey(date)){
             dailyLogs.get(date).setWeightLimit(weightLimit);
         }else{
@@ -49,23 +63,31 @@ public class MainController {
         }
 
     }
-    public double getCalLimit(Date date){
+    public double getCalLimit(LocalDate date){
         return dailyLogs.get(date).getCalLimit();
     }
-    public double getWeightLimit(Date date){
+    public double getWeightLimit(LocalDate date){
         return dailyLogs.get(date).getWeightLimit();
     }
-    public void addEdibleEntry(Date date,Edible edible, int quantity){
+    public void addEdibleEntry(LocalDate date,Edible edible, int quantity){
         edible.setQuantity(quantity);
         dailyLogs.get(date).addEdible(edible);
     }
-    public void removeEdibleEntry(Date date,Edible edible){
+    public void removeEdibleEntry(LocalDate date,Edible edible){
         dailyLogs.get(date).removeEdible(edible);
     }
     public List<Edible> getAllEdibles(){
         return edibles;
     }
-    public Log getLogOnDate(Date date){
+    public Log getLogOnDate(LocalDate date){
         return dailyLogs.get(date);
+    }
+
+    public List<Exercise> getAllExercises() {
+        return exercises;
+    }
+
+    public Map<LocalDate, Log> getAllLogs() {
+        return dailyLogs;
     }
 }
