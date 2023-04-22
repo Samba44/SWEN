@@ -29,6 +29,13 @@ public class MainController {
         exercises = new ArrayList<>();
     }
 
+    public void loadProgram() {
+        LoadController loadController = new LoadController();
+        loadController.loadExercise(this.exercises);
+        loadController.loadFood(this.edibles);
+        loadController.loadLog(dailyLogs);
+    }
+
     public void addEdible(Edible edible){
         edibles.add(edible);
     }
@@ -80,6 +87,10 @@ public class MainController {
         return edibles;
     }
     public Log getLogOnDate(LocalDate date){
+        if (!dailyLogs.containsKey(date)) {
+            dailyLogs.put(date, new DailyLog(date, Log.DEFAULT_CALORIES, Log.DEFAULT_WEIGHT));
+        }
+
         return dailyLogs.get(date);
     }
 

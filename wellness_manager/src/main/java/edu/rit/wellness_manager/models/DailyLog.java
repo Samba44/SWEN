@@ -2,7 +2,6 @@ package edu.rit.wellness_manager.models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class DailyLog implements Log{
@@ -52,6 +51,14 @@ public class DailyLog implements Log{
 
     public double getWeightLimit() {
         return weightLimit;
+    }
+
+    public List<Edible> getEdibles() {
+        return edibles;
+    }
+
+    public List<Exercise> getExercises() {
+        return exercises;
     }
 
     public double getTotalCal() {

@@ -2,9 +2,12 @@ package edu.rit.wellness_manager.view;
 
 import edu.rit.wellness_manager.controllers.MainController;
 import edu.rit.wellness_manager.controllers.SaveController;
+import edu.rit.wellness_manager.models.Edible;
 import edu.rit.wellness_manager.models.Exercise;
 import edu.rit.wellness_manager.models.Food;
+import edu.rit.wellness_manager.models.Log;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -12,9 +15,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Callback;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -64,32 +70,60 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
    // Date Picker
    private DatePicker datePicker = new DatePicker();
 
+   private ListView<Edible> edibleListView;
+
    //text inputs
    TextInputDialog tidNewFood = new TextInputDialog("Enter new food.");
    TextInputDialog tidNewExercise = new TextInputDialog("Enter new exercise.");
    TextInputDialog tidNewCalLimit = new TextInputDialog("Enter calorie limit.");
    TextInputDialog tidNewWeightLimit = new TextInputDialog("Enter weight limit.");
+   TextInputDialog tidAddNewLog = new TextInputDialog("Enter new log.");
 
    // Main
    public static void main(String[] args) {
       launch(args);
    }
+
+   private void changeList() {
+      LocalDate date = datePicker.getValue();
+      Log log = MainController.getInstance().getLogOnDate(date);
+      edibleListView.setItems(FXCollections.observableList(log.getEdibles()));
+   }
+
+   private void updateNutrients() {
+      LocalDate date = datePicker.getValue();
+      Log dailyLog = MainController.getInstance().getLogOnDate(date);
+      tfTotalCalories.setText(String.format("%.2f", dailyLog.getTotalCal()));
+      double totalFat = 0;
+      double totalCarb = 0;
+      double totalProtein = 0;
+
+      for (Edible edible : dailyLog.getEdibles()) {
+         totalFat += edible.getFat();
+         totalCarb += edible.getCarb();
+         totalProtein += edible.getProtein();
+      }
+
+      tfCarbs.setText(String.format("%.2f", totalCarb / (totalCarb + totalFat + totalProtein)));
+      tfFat.setText(String.format("%.2f", totalFat / (totalCarb + totalFat + totalProtein)));
+      tfProtein.setText(String.format("%.2f", totalProtein / (totalCarb + totalFat + totalProtein)));
+
+   }
    
    // Event Listener
    public void handle(ActionEvent ae) {
-      String selection = ((MenuItem)ae.getSource()).getText();
+      String selection = ((MenuItem) ae.getSource()).getText();
       MainController mainController = MainController.getInstance();
-      switch(selection) {
+      switch (selection) {
          case "Save":
             SaveController saveController = new SaveController();
             saveController.saveEdible(mainController.getAllEdibles());
             saveController.saveExercise(mainController.getAllExercises());
             saveController.saveLog(mainController.getAllLogs());
-            //TODO dailyLog
             break;
          case "New Food":
             Optional<String> s2 = tidNewFood.showAndWait();
-            if(s2.isPresent()) {
+            if (s2.isPresent()) { // Optional is present if user clicks OK
                String foodString = tidNewFood.getEditor().getText();
                String[] split = foodString.split(",");
                Food food = new Food(split[0], Double.parseDouble(split[1]), Double.parseDouble(split[2]), Double.parseDouble(split[3]), Double.parseDouble(split[4]));
@@ -101,7 +135,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
             break;
          case "New Exercise":
             Optional<String> s3 = tidNewExercise.showAndWait();
-            if(s3.isPresent()) {
+            if (s3.isPresent()) {
                String exerciseString = tidNewExercise.getEditor().getText();
                String[] split2 = exerciseString.split(",");
                Exercise exercise = new Exercise(split2[0], Double.parseDouble(split2[1]));
@@ -109,27 +143,62 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
             }
             break;
          case "New Log":
-            // Method
+            Optional<String> s4 = tidAddNewLog.showAndWait();
+            if (s4.isPresent()) {
+               String newLog = tidAddNewLog.getEditor().getText();
+               String[] split3 = newLog.split(",");
+               LocalDate logDate = datePicker.getValue();
+               boolean notFound = true;
+               for (Edible edible : mainController.getAllEdibles()) {
+                  if (edible.getName().equalsIgnoreCase(split3[0].trim())) {
+                     try {
+                        Edible toAdd = edible.clone();
+                        toAdd.setQuantity(Double.parseDouble(split3[1]));
+                        mainController.getLogOnDate(logDate).addEdible(toAdd);
+                        notFound = false;
+                        changeList();
+                     } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
+                     }
+                  }
+               }
+
+               for (Exercise exercise: mainController.getAllExercises()) {
+                  if (exercise.getName().equalsIgnoreCase(split3[0].trim())){
+                     // TODO exercise time
+                     mainController.getLogOnDate(logDate).addExercise(exercise);
+                     notFound = false;
+                  }
+               }
+
+               if(notFound){
+                  Alert notFoundAlert = new Alert(Alert.AlertType.ERROR);
+                  notFoundAlert.setHeaderText("Food or exercise does not exist, please try again.");
+                  notFoundAlert.showAndWait();
+               }
+
+               updateNutrients();
+            }
             break;
          case "Set Calorie Limit":
             LocalDate date = datePicker.getValue();
             Optional<String> s = tidNewCalLimit.showAndWait();
-            if (s.isPresent()){
+            if (s.isPresent()) {
                String newCalLimit = tidNewCalLimit.getEditor().getText();
-               mainController.setCalLimit(date,Double.parseDouble(newCalLimit));
+               mainController.setCalLimit(date, Double.parseDouble(newCalLimit));
                tfCalorieLimit.setText(newCalLimit);
             }
             break;
-          case "Set Weight Limit":
-             LocalDate date2 = datePicker.getValue();
-             Optional<String> s1 = tidNewWeightLimit.showAndWait();
-             if(s1.isPresent()) {
-                String newWeightLimit = tidNewWeightLimit.getEditor().getText();
-                mainController.setWeightLimit(date2, Double.parseDouble(newWeightLimit));
-                tfWeightLimit.setText(newWeightLimit);
-             }
+         case "Set Weight Limit":
+            LocalDate date2 = datePicker.getValue();
+            Optional<String> s1 = tidNewWeightLimit.showAndWait();
+            if (s1.isPresent()) {
+               String newWeightLimit = tidNewWeightLimit.getEditor().getText();
+               mainController.setWeightLimit(date2, Double.parseDouble(newWeightLimit));
+               tfWeightLimit.setText(newWeightLimit);
+            }
             break;
-          case "Exit":
+         case "Exit":
             System.exit(0);
             break;
       }
@@ -137,6 +206,8 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
 
    // Start
    public void start(Stage _stage) {
+      MainController.getInstance().loadProgram();
+
       stage = _stage;
       stage.setTitle("Food Activity");
       stage.setOnCloseRequest(
@@ -157,12 +228,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       mi6.setOnAction(this);
       mi7.setOnAction(this);
       mi8.setOnAction(this);
-      
-      // Set up List and Date Picker
-      taList.setWrapText(true);
-      taList.setPrefWidth(200);
-      taList.setPrefHeight(500);
-      
+
       GridPane gpList = new GridPane();
       gpList.setMinSize(200, 300);
       gpList.setPadding(new Insets(10, 10, 10, 10));
@@ -172,7 +238,26 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
 
       datePicker.setValue(LocalDate.now());
       gpList.add(datePicker, 0, 0);
-      gpList.add(taList, 0, 1);
+      edibleListView = new ListView<>(FXCollections.observableList(MainController.getInstance().getLogOnDate(datePicker.getValue()).getEdibles()));
+
+      edibleListView.setCellFactory(
+              new Callback<ListView<Edible>, ListCell<Edible>>() {
+                 @Override
+                 public ListCell<Edible> call(ListView<Edible> listView) {
+                    return new EdibleListCell();
+                 }
+              });
+      edibleListView.setPrefSize(300, 400);
+
+      gpList.add(edibleListView,1,0);
+
+      datePicker.setOnAction(new EventHandler<ActionEvent>() {
+         @Override
+         public void handle(ActionEvent actionEvent) {
+            changeList();
+         }
+      });
+
       
       // Set up food/recipe Information
       GridPane gpInfo = new GridPane();
@@ -208,7 +293,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       // Setup Root
       GridPane gpMain = new GridPane();
       gpMain.add(gpList, 0, 0);
-      gpMain.add(gpInfo, 1, 0);
+      gpMain.add(gpInfo, 0, 1);
 
       tidNewFood.setHeaderText("Enter new food in format:\n name,calories,fat,carb,protein");
       tidNewFood.setContentText("New food: ");
@@ -220,11 +305,43 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
 
       tidNewWeightLimit.setContentText("New Weight Limit: ");
 
+      tidAddNewLog.setHeaderText("Enter new log, for food or exercise and amount");
+      tidNewExercise.setContentText("New log: ");
+
       root.getChildren().addAll(menuBar, gpMain);
+
+      updateNutrients();
       
       scene = new Scene(root, 700, 600);
       stage.setScene(scene);
       stage.setResizable(false);
       stage.show();  
+   }
+
+   // Code from https://stackoverflow.com/questions/27438629/listview-with-custom-content-in-javafx
+   private class EdibleListCell extends ListCell<Edible> {
+      private HBox content;
+      private Text name;
+      private Text quantity;
+
+      public EdibleListCell() {
+         super();
+         name = new Text();
+         quantity = new Text();
+         content = new HBox(name, quantity);
+         content.setSpacing(10);
+      }
+
+      @Override
+      protected void updateItem(Edible edible, boolean empty) {
+         super.updateItem(edible, empty);
+         if (edible != null && !empty) {
+            name.setText(edible.getName());
+            quantity.setText(String.format("%.2f", edible.getQuantity()));
+            setGraphic(content);
+         } else {
+            setGraphic(null);
+         }
+      }
    }
 }

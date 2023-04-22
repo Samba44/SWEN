@@ -1,5 +1,7 @@
 package edu.rit.wellness_manager.models;
 
+import java.util.List;
+
 public interface Log {
     double DEFAULT_WEIGHT = 150.0;
     double DEFAULT_CALORIES = 2000.0;
@@ -12,4 +14,7 @@ public interface Log {
     double getCalLimit();
     double getWeightLimit();
     double getTotalCal();
+
+    List<Edible> getEdibles();
+    List<Exercise> getExercises();
 }
