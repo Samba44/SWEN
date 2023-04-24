@@ -2,11 +2,9 @@ package edu.rit.wellness_manager.view;
 
 import edu.rit.wellness_manager.controllers.MainController;
 import edu.rit.wellness_manager.controllers.SaveController;
-import edu.rit.wellness_manager.models.Edible;
-import edu.rit.wellness_manager.models.Exercise;
-import edu.rit.wellness_manager.models.Food;
-import edu.rit.wellness_manager.models.Log;
+import edu.rit.wellness_manager.models.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -47,22 +45,22 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
    
    // Info Labels and Text Boxes
    private Label lblCalorieLimit = new Label("Calorie Limit:");
-   private TextField tfCalorieLimit = new TextField();
+   private Label tfCalorieLimit = new Label();
    
    private Label lblWeightLimit = new Label("Weight Limit:");
-   private TextField tfWeightLimit = new TextField();
+   private Label tfWeightLimit = new Label();
    
    private Label lblTotalCalories = new Label("Total Calories:");
-   private TextField tfTotalCalories = new TextField();
+   private Label tfTotalCalories = new Label();
    
    private Label lblFat = new Label("Fat:");
-   private TextField tfFat = new TextField();
+   private Label tfFat = new Label();
    
    private Label lblCarbs = new Label("Carbs:");
-   private TextField tfCarbs = new TextField();
+   private Label tfCarbs = new Label();
    
    private Label lblProtein = new Label("Protein:");
-   private TextField tfProtein = new TextField();
+   private Label tfProtein = new Label();
    
    // List Text Area
    private TextArea taList = new TextArea();
@@ -71,6 +69,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
    private DatePicker datePicker = new DatePicker();
 
    private ListView<Edible> edibleListView;
+   private ListView<Exercise> exerciseListView;
 
    //text inputs
    TextInputDialog tidNewFood = new TextInputDialog("Enter new food.");
@@ -78,6 +77,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
    TextInputDialog tidNewCalLimit = new TextInputDialog("Enter calorie limit.");
    TextInputDialog tidNewWeightLimit = new TextInputDialog("Enter weight limit.");
    TextInputDialog tidAddNewLog = new TextInputDialog("Enter new log.");
+   TextInputDialog tidNewRecipe = new TextInputDialog("Enter new recipe.");
 
    // Main
    public static void main(String[] args) {
@@ -88,6 +88,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       LocalDate date = datePicker.getValue();
       Log log = MainController.getInstance().getLogOnDate(date);
       edibleListView.setItems(FXCollections.observableList(log.getEdibles()));
+      exerciseListView.setItems(FXCollections.observableList(log.getExercises()));
    }
 
    private void updateNutrients() {
@@ -104,10 +105,19 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
          totalProtein += edible.getProtein();
       }
 
-      tfCarbs.setText(String.format("%.2f", totalCarb / (totalCarb + totalFat + totalProtein)));
-      tfFat.setText(String.format("%.2f", totalFat / (totalCarb + totalFat + totalProtein)));
-      tfProtein.setText(String.format("%.2f", totalProtein / (totalCarb + totalFat + totalProtein)));
+      double nutrients = totalCarb + totalFat + totalProtein;
+      if (nutrients != 0) {
+         tfCarbs.setText(String.format("%.2f", totalCarb / nutrients));
+         tfFat.setText(String.format("%.2f", totalFat / nutrients));
+         tfProtein.setText(String.format("%.2f", totalProtein / nutrients));
+      } else {
+         tfCarbs.setText(String.format("%.2f", 0.00));
+         tfFat.setText(String.format("%.2f", 0.00));
+         tfProtein.setText(String.format("%.2f", 0.00));
+      }
 
+      tfWeightLimit.setText(String.format("%.2f", dailyLog.getWeightLimit()));
+      tfCalorieLimit.setText(String.format("%.2f", dailyLog.getCalLimit()));
    }
    
    // Event Listener
@@ -131,7 +141,27 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
             }
             break;
          case "New Recipe":
-            // Method
+            Optional<String> s5 = tidNewRecipe.showAndWait();
+            if (s5.isPresent()) {
+               String recipeString = tidNewRecipe.getEditor().getText();
+               String[] splitRecipe = recipeString.split(",");
+               String recipeName = splitRecipe[0];
+               Recipe recipe = new Recipe(recipeName);
+               for (int i = 1; i < splitRecipe.length; i+=2) {
+                  String edibleName = splitRecipe[i];
+                  double edibleQuantity = Double.parseDouble(splitRecipe[i + 1]);
+
+                  for (Edible edible: mainController.getAllEdibles()) {
+                     if (edible.getName().equalsIgnoreCase(edibleName.trim())) {
+                        try {
+                           recipe.addEdible(edible.clone(), edibleQuantity);
+                        } catch (CloneNotSupportedException e) {
+                           throw new RuntimeException(e);
+                        }
+                     }
+                  }
+               }
+            }
             break;
          case "New Exercise":
             Optional<String> s3 = tidNewExercise.showAndWait();
@@ -177,7 +207,13 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
                   notFoundAlert.showAndWait();
                }
 
-               updateNutrients();
+               Platform.runLater(new Runnable() {
+                  @Override
+                  public void run() {
+                     updateNutrients();
+                     changeList();
+                  }
+               });
             }
             break;
          case "Set Calorie Limit":
@@ -186,7 +222,12 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
             if (s.isPresent()) {
                String newCalLimit = tidNewCalLimit.getEditor().getText();
                mainController.setCalLimit(date, Double.parseDouble(newCalLimit));
-               tfCalorieLimit.setText(newCalLimit);
+               Platform.runLater(new Runnable() {
+                  @Override
+                  public void run() {
+                     tfCalorieLimit.setText(newCalLimit);
+                  }
+               });
             }
             break;
          case "Set Weight Limit":
@@ -195,7 +236,13 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
             if (s1.isPresent()) {
                String newWeightLimit = tidNewWeightLimit.getEditor().getText();
                mainController.setWeightLimit(date2, Double.parseDouble(newWeightLimit));
-               tfWeightLimit.setText(newWeightLimit);
+               Platform.runLater(new Runnable() {
+                  @Override
+                  public void run() {
+                     tfWeightLimit.setText(newWeightLimit);
+                  }
+               });
+
             }
             break;
          case "Exit":
@@ -239,6 +286,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       datePicker.setValue(LocalDate.now());
       gpList.add(datePicker, 0, 0);
       edibleListView = new ListView<>(FXCollections.observableList(MainController.getInstance().getLogOnDate(datePicker.getValue()).getEdibles()));
+      exerciseListView = new ListView<>(FXCollections.observableList(MainController.getInstance().getLogOnDate(datePicker.getValue()).getExercises()));
 
       edibleListView.setCellFactory(
               new Callback<ListView<Edible>, ListCell<Edible>>() {
@@ -249,15 +297,34 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
               });
       edibleListView.setPrefSize(300, 400);
 
+      exerciseListView.setCellFactory(new Callback<ListView<Exercise>, ListCell<Exercise>>() {
+         public ListCell<Exercise> call(ListView<Exercise> listView) {
+            return new ExerciseListCell();
+         }
+      });
+
       gpList.add(edibleListView,1,0);
+      gpList.add(exerciseListView,2,0);
 
       datePicker.setOnAction(new EventHandler<ActionEvent>() {
          @Override
          public void handle(ActionEvent actionEvent) {
-            changeList();
+            Platform.runLater(new Runnable() {
+               @Override
+               public void run() {
+                  changeList();
+                  updateNutrients();
+               }
+            });
          }
       });
 
+      Platform.runLater(new Runnable() {
+         @Override
+         public void run() {
+            updateNutrients();
+         }
+      });
       
       // Set up food/recipe Information
       GridPane gpInfo = new GridPane();
@@ -268,27 +335,21 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       
       gpInfo.add(lblCalorieLimit, 0, 0);
       gpInfo.add(tfCalorieLimit, 1, 0);
-      tfCalorieLimit.setDisable(true);
       
       gpInfo.add(lblWeightLimit, 0, 1);
       gpInfo.add(tfWeightLimit, 1, 1);
-      tfWeightLimit.setDisable(true);
       
       gpInfo.add(lblTotalCalories, 0, 2);
       gpInfo.add(tfTotalCalories, 1, 2);
-      tfTotalCalories.setDisable(true);
       
       gpInfo.add(lblFat, 0, 3);
       gpInfo.add(tfFat, 1, 3);
-      tfFat.setDisable(true);
       
       gpInfo.add(lblCarbs, 0, 4);
       gpInfo.add(tfCarbs, 1, 4);
-      tfCarbs.setDisable(true);
       
       gpInfo.add(lblProtein, 0, 5);
       gpInfo.add(tfProtein, 1, 5);
-      tfProtein.setDisable(true);
       
       // Setup Root
       GridPane gpMain = new GridPane();
@@ -308,9 +369,10 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
       tidAddNewLog.setHeaderText("Enter new log, for food or exercise and amount");
       tidNewExercise.setContentText("New log: ");
 
-      root.getChildren().addAll(menuBar, gpMain);
+      tidNewRecipe.setHeaderText("Enter new recipe");
+      tidNewRecipe.setContentText("New recipe: ");
 
-      updateNutrients();
+      root.getChildren().addAll(menuBar, gpMain);
       
       scene = new Scene(root, 700, 600);
       stage.setScene(scene);
@@ -338,6 +400,32 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
          if (edible != null && !empty) {
             name.setText(edible.getName());
             quantity.setText(String.format("%.2f", edible.getQuantity()));
+            setGraphic(content);
+         } else {
+            setGraphic(null);
+         }
+      }
+   }
+
+   private class ExerciseListCell extends ListCell<Exercise> {
+      private HBox content;
+      private Text name;
+      private Text quantity;
+
+      public ExerciseListCell() {
+         super();
+         name = new Text();
+         quantity = new Text();
+         content = new HBox(name, quantity);
+         content.setSpacing(10);
+      }
+
+      @Override
+      protected void updateItem(Exercise exercise, boolean empty) {
+         super.updateItem(exercise, empty);
+         if (exercise != null && !empty) {
+            name.setText(exercise.getName());
+            // quantity.setText(String.format("%.2f", exercise.getQuantity()));
             setGraphic(content);
          } else {
             setGraphic(null);

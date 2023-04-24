@@ -33,7 +33,7 @@ public class MainController {
         LoadController loadController = new LoadController();
         loadController.loadExercise(this.exercises);
         loadController.loadFood(this.edibles);
-        loadController.loadLog(dailyLogs);
+        loadController.loadLog(this.dailyLogs);
     }
 
     public void addEdible(Edible edible){

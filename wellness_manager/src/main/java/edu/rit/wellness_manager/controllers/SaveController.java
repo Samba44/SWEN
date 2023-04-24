@@ -19,7 +19,7 @@ public class SaveController implements FileController{
 
     public void saveEdible(List<Edible>ediblesToSave){
         try {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(foodFileName,true),true);
+            PrintWriter pw = new PrintWriter(new FileOutputStream(foodFileName,false),true);
             for (Edible e : ediblesToSave){
                 pw.println(e.toString());
             }
@@ -32,9 +32,9 @@ public class SaveController implements FileController{
     public void saveLog(Map<LocalDate, Log>logs){
         Set<LocalDate> dates = logs.keySet();
         try {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(logFileName,true),true);
+            PrintWriter pw = new PrintWriter(new FileOutputStream(logFileName,false),true);
             for (LocalDate date : dates){
-                pw.println(logs.get(date).toString());
+                pw.print(logs.get(date).toString());
             }
             pw.close();
         } catch (FileNotFoundException e) {
@@ -44,7 +44,7 @@ public class SaveController implements FileController{
 
     public void saveExercise(List<Exercise>exerciseToSave){
         try {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(exerciseFileName,true),true);
+            PrintWriter pw = new PrintWriter(new FileOutputStream(exerciseFileName,false),true);
             for (Exercise e : exerciseToSave){
                 pw.println(e.toString());
             }

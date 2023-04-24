@@ -29,7 +29,7 @@ public class Recipe implements Edible{
         for(Edible ingredient : edibles){
             sumCalories += ingredient.getCalories();
         }
-        return sumCalories;
+        return sumCalories * quantity;
     }
 
     public double getFat() {
@@ -37,7 +37,7 @@ public class Recipe implements Edible{
         for(Edible ingredient : edibles){
             sumFat += ingredient.getFat();
         }
-        return sumFat;
+        return sumFat * quantity;
     }
 
     public double getProtein() {
@@ -45,7 +45,7 @@ public class Recipe implements Edible{
         for(Edible ingredient : edibles){
             sumProtein += ingredient.getProtein();
         }
-        return sumProtein;
+        return sumProtein * quantity;
     }
 
     public double getCarb() {
@@ -53,7 +53,7 @@ public class Recipe implements Edible{
         for(Edible ingredient : edibles){
             sumCarbs += ingredient.getCarb();
         }
-        return sumCarbs;
+        return sumCarbs * quantity;
     }
 
     public double getQuantity() {

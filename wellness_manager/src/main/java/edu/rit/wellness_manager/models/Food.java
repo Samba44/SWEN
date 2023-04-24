@@ -25,15 +25,15 @@ public class Food implements Edible {
     }
 
     public double getCalories() {
-        return calories;
+        return calories * quantity;
     }
 
     public double getFat() {
-        return fat;
+        return fat * quantity;
     }
 
     public double getCarb() {
-        return carb;
+        return carb * quantity;
     }
 
     public double getQuantity() {
@@ -41,7 +41,7 @@ public class Food implements Edible {
     }
 
     public double getProtein() {
-        return protein;
+        return protein * quantity;
     }
 
     //setter
