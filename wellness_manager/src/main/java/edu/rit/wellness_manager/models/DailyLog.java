@@ -80,6 +80,9 @@ public class DailyLog implements Log{
         for (Edible var : edibles) {
             sb.append(String.format("%d,%d,%d,f,%s,%.2f\n", date.getYear(), date.getMonthValue(), date.getDayOfMonth(), var.getName(), var.getQuantity()));
         }
+        for (Exercise var : exercises) {
+            sb.append(String.format("%d,%d,%d,e,%s,%.2f\n", date.getYear(), date.getMonthValue(), date.getDayOfMonth(), var.getName(), 1.0));
+        }
         return sb.toString();
     }
 
