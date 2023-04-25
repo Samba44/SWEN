@@ -1,4 +1,5 @@
 b,banana,10.0,10.0,10.0,10.0
 b,kiwi,10.0,10.0,10.0,10.0
 b,onion,10.0,10.0,10.0,10.0
-r,pasta na pomadore, kiwi,2,banana,3
+r,pasta na pomadore,banana,3.00
+b,orange,25.0,25.0,25.0,5.0

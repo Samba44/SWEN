@@ -161,6 +161,7 @@ public class GUI extends Application implements EventHandler<ActionEvent> {
                      }
                   }
                }
+               mainController.addEdible(recipe);
             }
             break;
          case "New Exercise":
