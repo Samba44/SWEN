@@ -34,6 +34,7 @@ public class SaveController implements FileController{
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream(logFileName,false),true);
             for (LocalDate date : dates){
+                System.out.println(logs.get(date).toString());
                 pw.print(logs.get(date).toString());
             }
             pw.close();

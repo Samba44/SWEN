@@ -72,8 +72,7 @@ public class DailyLog implements Log{
         return totalCalories;
     }
 
-    public String toString() {
-
+    public String toString(){
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%d,%d,%d,w,%.2f\n", date.getYear(), date.getMonthValue(), date.getDayOfMonth(), weightLimit));
         sb.append(String.format("%d,%d,%d,c,%.2f\n", date.getYear(), date.getMonthValue(), date.getDayOfMonth(), calLimit));
